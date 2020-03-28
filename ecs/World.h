@@ -61,7 +61,7 @@ namespace ecs
 	}
 
 	template <typename C>
-	inline static C*
+	inline static Handle
 	world_component_add(World& w, Entity e)
 	{
 		C dummy;
@@ -70,14 +70,14 @@ namespace ecs
 		if (pair != w.type_storage_map.end())
 		{
 			Storage* storage = pair->second;
-			return (C*)storage->entity_add(e);
+			return storage->entity_add(e);
 		}
 		else
 		{
 			//fragmented..custom stack allocater if performance is bad -revisit-
 			Storage* storage = new Component_Storage<C>;
 			w.type_storage_map.insert(std::make_pair(type_hash, storage));
-			return (C*)storage->entity_add(e);
+			return storage->entity_add(e);
 		}
 	}
 
@@ -90,5 +90,18 @@ namespace ecs
 		auto pair = w.type_storage_map.find(type_hash);
 		if (pair != w.type_storage_map.end())
 			pair->second->entity_remove(e);
+	}
+
+	template<typename C>
+	inline static C*
+	world_handle_component(World& w, Handle h)
+	{
+		C dummy;
+		Component_Type_Hash type_hash = typeid(dummy).hash_code();
+		auto pair = w.type_storage_map.find(type_hash);
+		if (pair != w.type_storage_map.end())
+			return (C*)(pair->second->handle_component(h));
+
+		return nullptr;
 	}
 };

@@ -8,26 +8,41 @@
 
 namespace ecs
 {
+	struct Handle
+	{
+		int ix;
+	};
+
 	struct Storage
 	{
-		virtual void*
+		virtual Handle
 		entity_add(Entity e) = 0;
 
 		virtual void
 		entity_remove(Entity e) = 0;
 
-		virtual void*
+		virtual Handle
 		entity_comp(Entity e) = 0;
+
+		virtual void*
+		handle_component(Handle h) = 0;
+	};
+
+	template<typename C>
+	struct Component
+	{
+		C data;
+		bool deleted;
 	};
 
 	template<typename C>
 	struct Component_Storage : Storage
 	{
 		std::vector<Entity> entities;
-		std::vector<C> components;
+		std::vector<Component<C>> components;
 		std::unordered_map<Entity, unsigned int, Entity_Hash> lookup;
 
-		void*
+		Handle
 		entity_add(Entity e) override
 		{
 			return storage_entity_add<C>(*this, e);
@@ -39,59 +54,70 @@ namespace ecs
 			storage_entity_remove<C>(*this, e);
 		}
 
-		void*
+		Handle
 		entity_comp(Entity e) override
 		{
 			return storage_entity_comp_exists<C>(*this, e);
 		}
+
+		void*
+		handle_component(Handle h) override
+		{
+			return storage_handle_component<C>(*this, h);
+		}
+
 	};
 
-	template <typename Component>
-	inline static Component*
-	storage_entity_add(Component_Storage<Component>& storage, Entity e)
+	template <typename C>
+	inline static Handle
+	storage_entity_add(Component_Storage<C>& storage, Entity e)
 	{
-		Component* comp = storage_entity_comp_exists(storage, e);
-		if (comp == nullptr)
+		Handle comp = storage_entity_comp_exists(storage, e);
+		if (comp.ix == -1)
 		{
 			storage.entities.push_back(e);
-			storage.components.push_back(Component{});
+			storage.components.push_back(Component<C>{});
 			storage.lookup.insert(std::make_pair(e, storage.components.size() - 1));
 
 			//problametic, way to keep with polymorphism of base fn, return handle instead
-			return &storage.components.back();
+			return Handle{ (int) storage.components.size() - 1};
 		}
 		else
 			return comp;
 	}
 
-	template <typename Component>
+	template <typename C>
 	inline static void
-	storage_entity_remove(Component_Storage<Component>& storage, Entity e)
+	storage_entity_remove(Component_Storage<C>& storage, Entity e)
 	{
 		auto pair = storage.lookup.find(e);
 		if (pair != storage.lookup.end())
 		{
-			const size_t ix = pair->second;
-
-			//swap with last
-			storage.entities[ix] = storage.entities.back();
-			storage.components[ix] = std::move(storage.components.back());
-			storage.lookup[storage.entities[ix]] = ix;
-
-			//shrink
-			storage.entities.pop_back();
-			storage.components.pop_back();
+			//mark as deleted
+			size_t ix = pair->second;
+			storage.entities[ix] = ecs::INVALID_ENTITY;
+			storage.components[ix].deleted = true;
 			storage.lookup.erase(e);
 		}
 	}
 
-	template <typename Component>
-	inline static Component*
-	storage_entity_comp_exists(Component_Storage<Component>& storage, Entity e)
+	template <typename C>
+	inline static Handle
+	storage_entity_comp_exists(Component_Storage<C>& storage, Entity e)
 	{
 		auto pair = storage.lookup.find(e);
 		if (pair != storage.lookup.end())
-			return &storage.components[pair->second];
+			return Handle{ (int) pair->second };
+
+		return Handle{ -1 };
+	}
+
+	template<typename C>
+	inline static C*
+	storage_handle_component(Component_Storage<C>& storage, Handle h)
+	{
+		if (storage.components[h.ix].deleted == false)
+			return &storage.components[h.ix].data;
 
 		return nullptr;
 	}
