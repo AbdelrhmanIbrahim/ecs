@@ -23,8 +23,8 @@ namespace ecs
 	template<typename C>
 	struct Component_Storage : Storage
 	{
-		std::vector<Entity> ientities;
-		std::vector<C> icomponents;
+		std::vector<Entity> entities;
+		std::vector<C> components;
 		std::unordered_map<Entity, unsigned int, Entity_Hash> lookup;
 
 		void*
@@ -42,7 +42,7 @@ namespace ecs
 		void*
 		entity_comp(Entity e) override
 		{
-			return storage_entity_comp<C>(*this, e);
+			return storage_entity_comp_exists<C>(*this, e);
 		}
 	};
 
@@ -50,12 +50,18 @@ namespace ecs
 	inline static Component*
 	storage_entity_add(Component_Storage<Component>& storage, Entity e)
 	{
-		storage.ientities.push_back(e);
-		storage.icomponents.push_back(Component{});
-		storage.lookup.insert(std::make_pair(e, storage.icomponents.size() - 1));
+		Component* comp = storage_entity_comp_exists(storage, e);
+		if (comp == nullptr)
+		{
+			storage.entities.push_back(e);
+			storage.components.push_back(Component{});
+			storage.lookup.insert(std::make_pair(e, storage.components.size() - 1));
 
-		//problametic, way to keep with polymorphism of base fn
-		return &storage.icomponents.back();
+			//problametic, way to keep with polymorphism of base fn
+			return &storage.components.back();
+		}
+		else
+			return comp;
 	}
 
 	template <typename Component>
@@ -68,24 +74,24 @@ namespace ecs
 			const size_t ix = pair->second;
 
 			//swap with last
-			storage.ientities[ix] = storage.ientities.back();
-			storage.icomponents[ix] = std::move(storage.icomponents.back());
-			storage.lookup[storage.ientities[ix]] = ix;
+			storage.entities[ix] = storage.entities.back();
+			storage.components[ix] = std::move(storage.components.back());
+			storage.lookup[storage.entities[ix]] = ix;
 
 			//shrink
-			storage.ientities.pop_back();
-			storage.icomponents.pop_back();
+			storage.entities.pop_back();
+			storage.components.pop_back();
 			storage.lookup.erase(e);
 		}
 	}
 
 	template <typename Component>
 	inline static Component*
-	storage_entity_comp(Component_Storage<Component>& storage, Entity e)
+	storage_entity_comp_exists(Component_Storage<Component>& storage, Entity e)
 	{
 		auto pair = storage.lookup.find(e);
 		if (pair != storage.lookup.end())
-			return &storage.icomponents[pair->second];
+			return &storage.components[pair->second];
 
 		return nullptr;
 	}

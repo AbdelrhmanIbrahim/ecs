@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(HEADERS
 	ecs/Entity.h
 	ecs/Component_Storage.h
-	ecs/Universe.h
+	ecs/World.h
 	)
 
 #src

@@ -1,65 +1,41 @@
 #include <typeinfo>
 
-#include "ecs/Component_Storage.h"
-#include "ecs/Universe.h"
+#include "ecs/World.h"
 
-struct phy
+struct Physics
 {
-	int x, y;
+	int p;
 };
 
-
-struct greater_stuff
+struct Mesh
 {
-	virtual void lol() = 0;
+	int m;
 };
 
-template<typename L>
-void neh()
-{
-	int x = 3;
-}
-template<typename C>
-struct stuff : public greater_stuff
-{
-	int x;
+using namespace ecs;
 
-	void lol() override
-	{
-		neh<C>();
-	};
-};
-
-struct tes
-{
-	int x, y;
-};
 int
 main()
 {
-	ecs::Universe i{};
-	auto e = ecs::universe_entity_new(i);
-	auto e1 = ecs::universe_entity_new(i);
+	auto w = world_new();
+	auto e1 = world_entity_new(w);
+	auto e2 = world_entity_new(w);
+	auto e3 = world_entity_new(w);
 
-	ecs::universe_component_add<int>(i, e);
-	ecs::universe_component_add<int>(i, e1);
-	ecs::universe_component_add<float>(i, e1);
+	//problem for sure when component_storage reallocated its contents
+	auto m1 = world_component_add<Mesh>(w, e1);
+	auto m2 = world_component_add<Mesh>(w, e2);
+	auto m3 = world_component_add<Mesh>(w, e3);
+	m1->m = 1;
+	m2->m = 2;
+	m3->m = 3;
 
-	//test removal
+	auto p1 = world_component_add<Physics>(w, e1);
+	auto p2 = world_component_add<Physics>(w, e2);
 
-	ecs::Storage* a = new ecs::Component_Storage<tes>;
-	a->entity_add(ecs::Entity{ 2 });
-	auto s = (tes*)a->entity_comp(ecs::Entity{ 2 });
+	world_component_remove<Mesh>(w, e1);
 
-	greater_stuff* h = new stuff<int>;
-	h->lol();
-
-	ecs::Component_Storage<phy> phy_storage;
-	ecs::storage_entity_add(phy_storage, ecs::Entity{ 5 });
-	ecs::storage_entity_add(phy_storage, ecs::Entity{ 8 });
-	ecs::storage_entity_add(phy_storage, ecs::Entity{ 9 });
-	auto comp_2 = ecs::storage_entity_comp(phy_storage, ecs::Entity{ 8 });
-	//::storage_entity_remove(phy_storage, ecs::Entity{ 8 });
+	world_entity_remove(w, e1);
 
 	return  0;
 }
