@@ -57,7 +57,7 @@ namespace ecs
 			storage.components.push_back(Component{});
 			storage.lookup.insert(std::make_pair(e, storage.components.size() - 1));
 
-			//problametic, way to keep with polymorphism of base fn
+			//problametic, way to keep with polymorphism of base fn, return handle instead
 			return &storage.components.back();
 		}
 		else

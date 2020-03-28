@@ -76,7 +76,6 @@ namespace ecs
 		{
 			//fragmented..custom stack allocater if performance is bad -revisit-
 			Storage* storage = new Component_Storage<C>;
-			//((Component_Storage<C>*)storage)->components.reserve(1);
 			w.type_storage_map.insert(std::make_pair(type_hash, storage));
 			return (C*)storage->entity_add(e);
 		}
