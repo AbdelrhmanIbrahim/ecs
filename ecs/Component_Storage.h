@@ -8,32 +8,54 @@
 
 namespace ecs
 {
-	struct Entity_Hash
+	struct Storage
 	{
-		size_t
-		operator()(const Entity& e) const
-		{
-			return std::hash<uint32_t>()(e.id);
-		}
+		virtual void*
+		entity_add(Entity e) = 0;
+
+		virtual void
+		entity_remove(Entity e) = 0;
+
+		virtual void*
+		entity_comp(Entity e) = 0;
 	};
 
 	template<typename C>
-	struct Component_Storage
+	struct Component_Storage : Storage
 	{
 		std::vector<Entity> ientities;
 		std::vector<C> icomponents;
 		std::unordered_map<Entity, unsigned int, Entity_Hash> lookup;
+
+		void*
+		entity_add(Entity e) override
+		{
+			return storage_entity_add<C>(*this, e);
+		}
+
+		void
+		entity_remove(Entity e) override
+		{
+			storage_entity_remove<C>(*this, e);
+		}
+
+		void*
+		entity_comp(Entity e) override
+		{
+			return storage_entity_comp<C>(*this, e);
+		}
 	};
 
 	template <typename Component>
-	inline static Component&
+	inline static Component*
 	storage_entity_add(Component_Storage<Component>& storage, Entity e)
 	{
 		storage.ientities.push_back(e);
 		storage.icomponents.push_back(Component{});
-		storage.lookup.insert(std::make_pair(e, storage.icomponents.size()-1));
+		storage.lookup.insert(std::make_pair(e, storage.icomponents.size() - 1));
 
-		return storage.icomponents.back();
+		//problametic, way to keep with polymorphism of base fn
+		return &storage.icomponents.back();
 	}
 
 	template <typename Component>

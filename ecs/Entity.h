@@ -21,5 +21,14 @@ namespace ecs
 		}
 	};
 
+	struct Entity_Hash
+	{
+		size_t
+			operator()(const Entity& e) const
+		{
+			return std::hash<uint32_t>()(e.id);
+		}
+	};
+
 	static constexpr Entity INVALID_ENTITY{ 0 };
 };
