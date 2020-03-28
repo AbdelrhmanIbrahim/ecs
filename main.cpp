@@ -1,6 +1,7 @@
 #include <typeinfo>
 
 #include "ecs/Component_Storage.h"
+#include "ecs/Universe.h"
 
 struct phy
 {
@@ -36,6 +37,16 @@ struct tes
 int
 main()
 {
+	ecs::Universe i{};
+	auto e = ecs::universe_entity_new(i);
+	auto e1 = ecs::universe_entity_new(i);
+
+	ecs::universe_component_add<int>(i, e);
+	ecs::universe_component_add<int>(i, e1);
+	ecs::universe_component_add<float>(i, e1);
+
+	//test removal
+
 	ecs::Storage* a = new ecs::Component_Storage<tes>;
 	a->entity_add(ecs::Entity{ 2 });
 	auto s = (tes*)a->entity_comp(ecs::Entity{ 2 });
