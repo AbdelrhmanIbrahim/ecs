@@ -1,1 +1,1 @@
-##Entity-Component-System.
+## Header-only Entity-Component-System.
