@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <type_traits>
 
 namespace ecs
 {
