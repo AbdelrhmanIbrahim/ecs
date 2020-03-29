@@ -98,4 +98,23 @@ namespace ecs
 
 		return nullptr;
 	}
+
+	template<typename C>
+	inline static std::vector<C*>
+	world_components_data(World& w)
+	{
+		C dummy;
+		Component_Type_Hash type_hash = typeid(dummy).hash_code();
+		auto pair = w.type_storage_map.find(type_hash);
+		if (pair != w.type_storage_map.end())
+		{
+			std::vector<void*> &comps = pair->second->components_data();
+			std::vector<C*> data(comps.size());
+			for (int ix = 0; ix < comps.size(); ++ix)
+				data[ix] = (C*)comps[ix];
+
+			return data;
+		}
+		return std::vector<C*>{};
+	}
 };

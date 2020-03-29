@@ -24,7 +24,11 @@ main()
 	auto h1 = world_component_add<Mesh>(w, e1);
 	auto h2 = world_component_add<Mesh>(w, e2);
 	auto h3 = world_component_add<Mesh>(w, e3);
-	world_entity_remove(w, e1);
+
+	world_handle_component<Mesh>(w, h2)->m = 5;
+
+	auto data = world_components_data<Mesh>(w);
+
 
 	return  0;
 }

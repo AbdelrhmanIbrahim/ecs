@@ -39,6 +39,9 @@ namespace ecs
 
 		virtual void*
 		handle_component(Handle h) = 0;
+
+		virtual std::vector<void*>
+		components_data() = 0;
 	};
 
 	template<typename C>
@@ -79,6 +82,14 @@ namespace ecs
 			return storage_handle_component<C>(*this, h);
 		}
 
+		std::vector<void*>
+		components_data() override
+		{
+			std::vector<void*> data(components.size());
+			for(unsigned int ix = 0; ix < data.size(); ++ix)
+				data[ix] = &components[ix].data;
+			return data;
+		}
 	};
 
 	template <typename C>
