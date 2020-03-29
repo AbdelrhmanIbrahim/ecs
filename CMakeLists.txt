@@ -22,7 +22,6 @@ set(SOURCES
 #make it reflect the same structure as the one on disk
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADERS})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${RESOURCES})
 
 add_executable(${PROJECT_NAME}
 				${HEADERS}
