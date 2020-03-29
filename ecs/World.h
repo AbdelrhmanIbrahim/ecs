@@ -10,6 +10,9 @@
 
 namespace ecs
 {
+	//no garbage collection, we don't actually deleteing when remove, we just marking things as deleted to simplify indexing and data access later
+	//make garbage collection if needed -revisit-
+
 	typedef size_t Component_Type_Hash;
 	struct World
 	{
@@ -35,27 +38,17 @@ namespace ecs
 	inline static Entity
 	world_entity_new(World& w)
 	{
-		w.id_counter++;
-		w.entities.push_back(Entity{ w.id_counter });
+		w.entities.push_back(Entity{ ++w.id_counter });
 		return w.entities.back();
 	}
 
 	inline static void
 	world_entity_remove(World& w, Entity e)
 	{
-		//remove from universe entities
-		//for now, later make hashmap(Entity -> Index in entities vector)
-		for (unsigned int ix = 0; ix < w.entities.size(); ++ix)
-		{
-			if (w.entities[ix] == e)
-			{
-				w.entities[ix] = w.entities.back();
-				w.entities.pop_back();
-				break;
-			}
-		}
+		//mark as deleted
+		w.entities[e.id - 1] = INVALID_ENTITY;
 
-		//now remove it from components storage
+		//now mark as deleteds from components storage
 		for (auto it = w.type_storage_map.begin(); it != w.type_storage_map.end(); ++it)
 			it->second->entity_remove(e);
 	}

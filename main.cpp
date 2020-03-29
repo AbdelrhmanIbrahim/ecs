@@ -1,5 +1,3 @@
-#include <typeinfo>
-
 #include "ecs/World.h"
 
 struct Physics
@@ -26,18 +24,6 @@ main()
 	auto h1 = world_component_add<Mesh>(w, e1);
 	auto h2 = world_component_add<Mesh>(w, e2);
 	auto h3 = world_component_add<Mesh>(w, e3);
-	auto daat = world_handle_component<Mesh>(w, h3);
-	daat->m = 3;
-
-	world_component_remove<Mesh>(w, e3);
-	auto h4 = world_component_add<Mesh>(w, e4);
-	auto daats = world_handle_component<Mesh>(w, h3);
-
-	auto p1 = world_component_add<Physics>(w, e1);
-	auto p2 = world_component_add<Physics>(w, e2);
-
-	world_component_remove<Mesh>(w, e1);
-	world_handle_component<Mesh>(w, h2)->m = 2;
 	world_entity_remove(w, e1);
 
 	return  0;
