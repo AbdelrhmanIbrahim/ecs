@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vcruntime.h>
 #include <utility>
+#include <typeinfo>
 
 namespace ecs
 {
