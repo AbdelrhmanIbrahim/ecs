@@ -11,7 +11,20 @@ namespace ecs
 	struct Handle
 	{
 		int ix;
+
+		bool
+		operator==(const Handle& other) const
+		{
+			return  ix == other.ix;
+		}
+
+		bool
+		operator!=(const Handle& other) const
+		{
+			return  ix != other.ix;
+		}
 	};
+	static constexpr Handle INVALID_HANDLE{ 0 };
 
 	struct Storage
 	{
@@ -72,18 +85,16 @@ namespace ecs
 	inline static Handle
 	storage_entity_add(Component_Storage<C>& storage, Entity e)
 	{
-		Handle comp = storage_entity_comp_exists(storage, e);
-		if (comp.ix == -1)
+		Handle handle = storage_entity_comp_exists(storage, e);
+		if (handle == INVALID_HANDLE)
 		{
 			storage.entities.push_back(e);
 			storage.components.push_back(Component<C>{});
 			storage.lookup.insert(std::make_pair(e, storage.components.size() - 1));
-
-			//problametic, way to keep with polymorphism of base fn, return handle instead
 			return Handle{ (int) storage.components.size() - 1};
 		}
 		else
-			return comp;
+			return handle;
 	}
 
 	template <typename C>
@@ -109,7 +120,7 @@ namespace ecs
 		if (pair != storage.lookup.end())
 			return Handle{ (int) pair->second };
 
-		return Handle{ -1 };
+		return INVALID_HANDLE;
 	}
 
 	template<typename C>
