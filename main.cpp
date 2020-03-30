@@ -29,6 +29,7 @@ main()
 
 	auto& data = world_components_data<Mesh>(w);
 	data[1].data.m = 4;
+	world_entity_remove(w, e1);
 	auto datas = world_components_data<Mesh>(w);
 	return  0;
 }

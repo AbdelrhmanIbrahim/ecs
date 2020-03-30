@@ -80,6 +80,7 @@ namespace ecs
 			//mark as deleted
 			size_t ix = pair->second;
 			storage->entities[ix] = ecs::INVALID_ENTITY;
+			storage->components[ix].entity = ecs::INVALID_ENTITY;
 			storage->components[ix].deleted = true;
 			storage->lookup.erase(e);
 		}
