@@ -26,29 +26,17 @@ namespace ecs
 	};
 	static constexpr Handle INVALID_HANDLE{ 0 };
 
-	struct Storage
-	{
-		virtual Handle
-		entity_add(Entity e) = 0;
-
-		virtual void
-		entity_remove(Entity e) = 0;
-
-		virtual Handle
-		entity_comp(Entity e) = 0;
-
-		virtual void*
-		handle_component(Handle h) = 0;
-
-		virtual std::vector<void*>
-		components_data() = 0;
-	};
-
 	template<typename C>
 	struct Component
 	{
 		C data;
 		bool deleted;
+	};
+
+	struct Storage
+	{
+		virtual void
+		entity_remove(Entity e) = 0;
 	};
 
 	template<typename C>
@@ -58,55 +46,24 @@ namespace ecs
 		std::vector<Component<C>> components;
 		std::unordered_map<Entity, unsigned int, Entity_Hash> lookup;
 
-		Handle
-		entity_add(Entity e) override
-		{
-			return storage_entity_add<C>(*this, e);
-		}
-
 		void
-		entity_remove(Entity e) override
+		entity_remove(Entity e)
 		{
-			storage_entity_remove<C>(*this, e);
-		}
-
-		Handle
-		entity_comp(Entity e) override
-		{
-			return storage_entity_comp_exists<C>(*this, e);
-		}
-
-		void*
-		handle_component(Handle h) override
-		{
-			return storage_handle_component<C>(*this, h);
-		}
-
-		//cache misses
-		std::vector<void*>
-		components_data() override
-		{
-			std::vector<void*> data(components.size());
-			for (unsigned int ix = 0; ix < data.size(); ++ix)
-			{
-				if(components[ix].deleted == false)
-					data[ix] = &components[ix].data;
-			}
-			return data;
+			storage_entity_remove<C>(this, e);
 		}
 	};
 
 	template <typename C>
 	inline static Handle
-	storage_entity_add(Component_Storage<C>& storage, Entity e)
+	storage_entity_add(Component_Storage<C>* storage, Entity e)
 	{
 		Handle handle = storage_entity_comp_exists(storage, e);
 		if (handle == INVALID_HANDLE)
 		{
-			storage.entities.push_back(e);
-			storage.components.push_back(Component<C>{});
-			storage.lookup.insert(std::make_pair(e, storage.components.size() - 1));
-			return Handle{ (int) storage.components.size() - 1};
+			storage->entities.push_back(e);
+			storage->components.push_back(Component<C>{});
+			storage->lookup.insert(std::make_pair(e, storage->components.size() - 1));
+			return Handle{ (int) storage->components.size() - 1};
 		}
 		else
 			return handle;
@@ -114,25 +71,25 @@ namespace ecs
 
 	template <typename C>
 	inline static void
-	storage_entity_remove(Component_Storage<C>& storage, Entity e)
+	storage_entity_remove(Component_Storage<C>* storage, Entity e)
 	{
-		auto pair = storage.lookup.find(e);
-		if (pair != storage.lookup.end())
+		auto pair = storage->lookup.find(e);
+		if (pair != storage->lookup.end())
 		{
 			//mark as deleted
 			size_t ix = pair->second;
-			storage.entities[ix] = ecs::INVALID_ENTITY;
-			storage.components[ix].deleted = true;
-			storage.lookup.erase(e);
+			storage->entities[ix] = ecs::INVALID_ENTITY;
+			storage->components[ix].deleted = true;
+			storage->lookup.erase(e);
 		}
 	}
 
 	template <typename C>
 	inline static Handle
-	storage_entity_comp_exists(Component_Storage<C>& storage, Entity e)
+	storage_entity_comp_exists(Component_Storage<C>* storage, Entity e)
 	{
-		auto pair = storage.lookup.find(e);
-		if (pair != storage.lookup.end())
+		auto pair = storage->lookup.find(e);
+		if (pair != storage->lookup.end())
 			return Handle{ (int) pair->second };
 
 		return INVALID_HANDLE;
@@ -140,11 +97,24 @@ namespace ecs
 
 	template<typename C>
 	inline static C*
-	storage_handle_component(Component_Storage<C>& storage, Handle h)
+	storage_handle_component(Component_Storage<C>* storage, Handle h)
 	{
-		if (storage.components[h.ix].deleted == false)
-			return &storage.components[h.ix].data;
+		if (storage->components[h.ix].deleted == false)
+			return &storage->components[h.ix].data;
 
 		return nullptr;
+	}
+
+	template<typename C>
+	inline static std::vector<C>
+	storage_components_data(const Component_Storage<C>* storage)
+	{
+		std::vector<C> data(storage->lookup.size());
+		for (unsigned int ix = 0; ix < storage->components.size(); ++ix)
+		{
+			if (storage->components[ix].deleted == false)
+				data[ix] = storage->components[ix].data;
+		}
+		return data;
 	}
 };
