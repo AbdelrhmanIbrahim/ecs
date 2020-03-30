@@ -82,12 +82,16 @@ namespace ecs
 			return storage_handle_component<C>(*this, h);
 		}
 
+		//cache misses
 		std::vector<void*>
 		components_data() override
 		{
 			std::vector<void*> data(components.size());
-			for(unsigned int ix = 0; ix < data.size(); ++ix)
-				data[ix] = &components[ix].data;
+			for (unsigned int ix = 0; ix < data.size(); ++ix)
+			{
+				if(components[ix].deleted == false)
+					data[ix] = &components[ix].data;
+			}
 			return data;
 		}
 	};
