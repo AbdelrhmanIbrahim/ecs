@@ -27,8 +27,8 @@ main()
 
 	world_handle_component<Mesh>(w, h2)->m = 5;
 
-	auto data = world_components_data<Mesh>(w);
-
-
+	auto& data = world_components_data<Mesh>(w);
+	data[1].data.m = 4;
+	auto datas = world_components_data<Mesh>(w);
 	return  0;
 }

@@ -29,6 +29,7 @@ namespace ecs
 	template<typename C>
 	struct Component
 	{
+		Entity entity;
 		C data;
 		bool deleted;
 	};
@@ -61,7 +62,7 @@ namespace ecs
 		if (handle == INVALID_HANDLE)
 		{
 			storage->entities.push_back(e);
-			storage->components.push_back(Component<C>{});
+			storage->components.push_back(Component<C>{e});
 			storage->lookup.insert(std::make_pair(e, storage->components.size() - 1));
 			return Handle{ (int) storage->components.size() - 1};
 		}
@@ -106,15 +107,9 @@ namespace ecs
 	}
 
 	template<typename C>
-	inline static std::vector<C>
-	storage_components_data(const Component_Storage<C>* storage)
+	inline static std::vector<Component<C>>&
+	storage_components_data(Component_Storage<C>* storage)
 	{
-		std::vector<C> data(storage->lookup.size());
-		for (unsigned int ix = 0; ix < storage->components.size(); ++ix)
-		{
-			if (storage->components[ix].deleted == false)
-				data[ix] = storage->components[ix].data;
-		}
-		return data;
+		return storage->components;
 	}
 };

@@ -99,8 +99,9 @@ namespace ecs
 		return nullptr;
 	}
 
+	//always use ref variable if you want to edit data and check if component marked as deleted or not
 	template<typename C>
-	inline static std::vector<C>
+	inline static std::vector<Component<C>>&
 	world_components_data(World& w)
 	{
 		C dummy;
@@ -109,6 +110,6 @@ namespace ecs
 		if (pair != w.type_storage_map.end())
 			return storage_components_data(((Component_Storage<C>*)(pair->second)));
 
-		return std::vector<C>{};
+		return std::vector<Component<C>>{};
 	}
 };
