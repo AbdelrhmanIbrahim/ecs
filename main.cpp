@@ -1,4 +1,6 @@
 #include "ecs/World.h"
+#include "ecs/Meta.h"
+using namespace ecs;
 
 struct Physics
 {
@@ -8,10 +10,12 @@ struct Physics
 struct Mesh
 {
 	int m;
-
+	void
+	free()
+	{
+		m++;
+	}
 };
-
-using namespace ecs;
 
 int
 main()
@@ -23,6 +27,7 @@ main()
 	auto e4 = world_entity_new(w);
 
 	auto h1 = world_component_add<Mesh>(w, e1);
+	world_entity_remove(w, e1);
 	auto h2 = world_component_add<Mesh>(w, e2);
 	auto h3 = world_component_add<Mesh>(w, e3);
 
@@ -30,7 +35,10 @@ main()
 
 	auto& data = world_components_data<Mesh>(w);
 	data[1].data.m = 4;
-	world_entity_remove(w, e1);
+	world_entity_remove(w, e2);
+
 	auto datas = world_components_data<Mesh>(w);
+
+	world_free(w);
 	return  0;
 }

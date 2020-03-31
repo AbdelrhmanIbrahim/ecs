@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 #headers
 set(HEADERS
 	ecs/Entity.h
+	ecs/Meta.h
 	ecs/Component_Storage.h
 	ecs/World.h
 	)

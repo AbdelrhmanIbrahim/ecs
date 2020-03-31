@@ -11,7 +11,7 @@
 
 namespace ecs
 {
-	//no garbage collection, we don't actually deleteing when remove, we just marking things as deleted to simplify indexing and data access later
+	//for each component, must add member free() fucntion in case of resources releasing from World 
 	//make garbage collection if needed -revisit-
 
 	typedef size_t Component_Type_Hash;
@@ -32,8 +32,11 @@ namespace ecs
 	inline static void
 	world_free(World& w)
 	{
-		for (auto it = w.type_storage_map.begin(); it != w.type_storage_map.end(); ++it)
+		for (auto& it = w.type_storage_map.begin(); it != w.type_storage_map.end(); ++it)
+		{
+			((Storage*)it->second)->remove();
 			delete it->second;
+		}
 	}
 
 	inline static Entity

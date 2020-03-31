@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entity.h"
+#include "Meta.h"
 
 #include <vector>
 #include <unordered_map>
@@ -38,6 +39,9 @@ namespace ecs
 	{
 		virtual void
 		entity_remove(Entity e) = 0;
+
+		virtual void
+		remove() = 0;
 	};
 
 	template<typename C>
@@ -51,6 +55,14 @@ namespace ecs
 		entity_remove(Entity e)
 		{
 			storage_entity_remove<C>(this, e);
+		}
+
+		void
+		remove()
+		{
+			for (auto& comp : components)
+				if(comp.deleted == false)
+					storage_entity_remove<C>(this, comp.entity);
 		}
 	};
 
@@ -83,6 +95,8 @@ namespace ecs
 			storage->components[ix].entity = ecs::INVALID_ENTITY;
 			storage->components[ix].deleted = true;
 			storage->lookup.erase(e);
+			if constexpr (has_free<C>::result)
+				storage->components[ix].data.free();
 		}
 	}
 
