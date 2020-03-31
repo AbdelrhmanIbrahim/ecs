@@ -58,8 +58,7 @@ namespace ecs
 	inline static Handle
 	world_component_add(World& w, Entity e)
 	{
-		C dummy;
-		Component_Type_Hash type_hash = typeid(dummy).hash_code();
+		Component_Type_Hash type_hash = typeid(C).hash_code();
 		auto pair = w.type_storage_map.find(type_hash);
 		if (pair != w.type_storage_map.end())
 		{
@@ -79,8 +78,7 @@ namespace ecs
 	inline static void
 	world_component_remove(World& w, Entity e)
 	{
-		C dummy;
-		Component_Type_Hash type_hash = typeid(dummy).hash_code();
+		Component_Type_Hash type_hash = typeid(C).hash_code();
 		auto pair = w.type_storage_map.find(type_hash);
 		if (pair != w.type_storage_map.end())
 			((Component_Storage<C>*)(pair->second))->entity_remove(e);
@@ -90,8 +88,7 @@ namespace ecs
 	inline static C*
 	world_handle_component(World& w, Handle h)
 	{
-		C dummy;
-		Component_Type_Hash type_hash = typeid(dummy).hash_code();
+		Component_Type_Hash type_hash = typeid(C).hash_code();
 		auto pair = w.type_storage_map.find(type_hash);
 		if (pair != w.type_storage_map.end())
 			return storage_handle_component((Component_Storage<C>*)(pair->second), h);
@@ -104,8 +101,7 @@ namespace ecs
 	inline static std::vector<Component<C>>&
 	world_components_data(World& w)
 	{
-		C dummy;
-		Component_Type_Hash type_hash = typeid(dummy).hash_code();
+		Component_Type_Hash type_hash = typeid(C).hash_code();
 		auto pair = w.type_storage_map.find(type_hash);
 		if (pair != w.type_storage_map.end())
 			return storage_components_data(((Component_Storage<C>*)(pair->second)));

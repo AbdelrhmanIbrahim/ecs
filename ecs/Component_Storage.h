@@ -62,7 +62,7 @@ namespace ecs
 		if (handle == INVALID_HANDLE)
 		{
 			storage->entities.push_back(e);
-			storage->components.push_back(Component<C>{e});
+			storage->components.push_back(Component<C>{e, C{}, false});
 			storage->lookup.insert(std::make_pair(e, storage->components.size() - 1));
 			return Handle{ (int) storage->components.size() - 1};
 		}

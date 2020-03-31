@@ -8,6 +8,7 @@ struct Physics
 struct Mesh
 {
 	int m;
+
 };
 
 using namespace ecs;
