@@ -25,7 +25,7 @@ namespace ecs
 			return  ix != other.ix;
 		}
 	};
-	static constexpr Handle INVALID_HANDLE{ 0 };
+	static constexpr Handle INVALID_HANDLE{ -1 };
 
 	template<typename C>
 	struct Component
