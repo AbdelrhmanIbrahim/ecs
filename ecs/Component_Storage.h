@@ -56,7 +56,7 @@ namespace ecs
 		entity_remove(Entity e) = 0;
 
 		virtual void
-		remove() = 0;
+		free() = 0;
 	};
 
 	template<typename C>
@@ -74,11 +74,12 @@ namespace ecs
 		}
 
 		void
-		remove()
+		free()
 		{
-			for (auto& comp : components)
-				if(comp.deleted == false)
-					storage_entity_remove<C>(this, comp.entity);
+			int first_active_ix = entities.size() - active_components;
+			int size = first_active_ix + active_components;
+			for (int i = first_active_ix ; i < size; ++i)
+				storage_entity_remove<C>(this, entities[i]);
 		}
 	};
 
@@ -108,13 +109,16 @@ namespace ecs
 		auto pair = storage->lookup.find(e);
 		if (pair != storage->lookup.end())
 		{
-			size_t ix = pair->second;
-			storage->entities[ix] = ecs::INVALID_ENTITY;
-			storage->components[ix].entity = ecs::INVALID_ENTITY;
-			storage->components[ix].deleted = true;
+			size_t to_delete_ix = pair->second;
+			storage->entities[to_delete_ix] = ecs::INVALID_ENTITY;
+			storage->components[to_delete_ix].entity = ecs::INVALID_ENTITY;
+			storage->components[to_delete_ix].deleted = true;
+
 			size_t first_active_ix = storage->entities.size() - storage->active_components;
-			std::swap(storage->entities[first_active_ix], storage->entities[ix]);
-			std::swap(storage->components[first_active_ix], storage->components[ix]);
+			storage->lookup[storage->entities[first_active_ix]] = to_delete_ix;
+			std::swap(storage->entities[first_active_ix], storage->entities[to_delete_ix]);
+			std::swap(storage->components[first_active_ix], storage->components[to_delete_ix]);
+
 			storage->active_components--;
 			storage->lookup.erase(e);
 			if constexpr (has_free<C>::result)

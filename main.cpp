@@ -36,17 +36,10 @@ main()
 	world_handle_component<Mesh>(w, h2)->m = 3;
 	world_handle_component<Mesh>(w, h3)->m = 4;
 
-	world_entity_remove(w, e2);
-	auto bag = world_active_components_entities<Mesh>(w);
 	world_entity_remove(w, e3);
-	bag = world_active_components_entities<Mesh>(w);
-
-	std::vector<Mesh> m;
-	for (int x = 0; x < bag.size; ++x)
-		m.push_back(bag[x].data);
-
-	//world_entity_remove(w, e1);
+	auto bag = world_active_components_entities<Mesh>(w);
 
 	world_free(w);
+	
 	return  0;
 }

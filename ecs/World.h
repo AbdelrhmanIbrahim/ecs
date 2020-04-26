@@ -32,7 +32,7 @@ namespace ecs
 	{
 		for (auto& it = w.type_storage_map.begin(); it != w.type_storage_map.end(); ++it)
 		{
-			((Storage*)it->second)->remove();
+			((Storage*)it->second)->free();
 			delete it->second;
 		}
 	}
