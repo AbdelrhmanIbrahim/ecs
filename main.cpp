@@ -36,9 +36,7 @@ main()
 	world_handle_component<Mesh>(w, h2)->m = 3;
 	world_handle_component<Mesh>(w, h3)->m = 4;
 
-	world_entity_remove(w, e3);
-	auto bag = world_active_components_entities<Mesh>(w);
-
+	auto bag = world_active_components<Mesh>(w);
 	world_free(w);
 	
 	return  0;

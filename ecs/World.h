@@ -99,12 +99,12 @@ namespace ecs
 
 	template<typename C>
 	inline static ecs::Bag<C>
-	world_active_components_entities(World& w)
+	world_active_components(World& w)
 	{
 		Component_Type_Hash type_hash = typeid(C).hash_code();
 		auto pair = w.type_storage_map.find(type_hash);
 		if (pair != w.type_storage_map.end())
-			return storage_active_components_entities(((Component_Storage<C>*)(pair->second)));
+			return storage_active_components(((Component_Storage<C>*)(pair->second)));
 
 		return ecs::Bag<C>{ 0, nullptr };
 	}
