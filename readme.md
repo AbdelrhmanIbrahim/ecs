@@ -2,5 +2,3 @@
 
 For POD components: 
 If a component owns resources then it must have a 'free()' member function to make the storage handles the freeing.
-
-Note : freeing of non POD is not supported yet. 
