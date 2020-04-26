@@ -35,6 +35,14 @@ namespace ecs
 		bool deleted;
 	};
 
+	template<typename T>
+	struct
+	Bag
+	{
+		int size;
+		ecs::Component<T>* ptr;
+	};
+
 	struct Storage
 	{
 		virtual void
@@ -122,9 +130,9 @@ namespace ecs
 	}
 
 	template<typename C>
-	inline static std::vector<Component<C>>&
+	inline static ecs::Bag<C>
 	storage_components_data(Component_Storage<C>* storage)
 	{
-		return storage->components;
+		return ecs::Bag<C>{ (int)storage->components.size(), &storage->components.front() };
 	}
 };
