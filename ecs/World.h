@@ -108,7 +108,8 @@ namespace ecs
 		auto pair = w.type_storage_map.find(type_hash);
 		if (pair != w.type_storage_map.end())
 			return storage_components_data(((Component_Storage<C>*)(pair->second)));
-
+		
+		//dangling ref to temporary, this will cause bugs if comp not in the storage -revisit-
 		return std::vector<Component<C>>{};
 	}
 };
