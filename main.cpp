@@ -37,7 +37,7 @@ main()
 
 	std::vector<Mesh> m;
 	for (int x = 0; x < bag.size; ++x)
-		m.push_back(bag.ptr[x].data);
+		m.push_back(bag[x].data);
 
 	//world_entity_remove(w, e1);
 	//world_entity_remove(w, e2);

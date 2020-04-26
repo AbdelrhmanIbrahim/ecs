@@ -41,6 +41,12 @@ namespace ecs
 	{
 		int size;
 		ecs::Component<T>* ptr;
+
+		ecs::Component<T>&
+		operator[](unsigned int index)
+		{
+			return ptr[index];
+		}
 	};
 
 	struct Storage
