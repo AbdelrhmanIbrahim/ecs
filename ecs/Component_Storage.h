@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <stdint.h>
+#include <algorithm>
 
 namespace ecs
 {
@@ -61,6 +62,7 @@ namespace ecs
 	template<typename C>
 	struct Component_Storage : Storage
 	{
+		int active_components;
 		std::vector<Entity> entities;
 		std::vector<Component<C>> components;
 		std::unordered_map<Entity, unsigned int, Entity_Hash> lookup;
@@ -87,8 +89,9 @@ namespace ecs
 		Handle handle = storage_entity_comp_exists(storage, e);
 		if (handle == INVALID_HANDLE)
 		{
-			storage->entities.push_back(e);
-			storage->components.push_back(Component<C>{e, C{}, false});
+			storage->active_components++;
+			storage->entities.emplace_back(e);
+			storage->components.emplace_back(Component<C>{e, C{}, false});
 			storage->lookup.insert(std::make_pair(e, storage->components.size() - 1));
 			return Handle{ (int) storage->components.size() - 1};
 		}
@@ -96,6 +99,8 @@ namespace ecs
 			return handle;
 	}
 
+	//removal happens by  marking as deleted and swapping it with the first active element in both arrays
+	//to have a contionus active data (better caching and no branching needed)
 	template <typename C>
 	inline static void
 	storage_entity_remove(Component_Storage<C>* storage, Entity e)
@@ -103,14 +108,17 @@ namespace ecs
 		auto pair = storage->lookup.find(e);
 		if (pair != storage->lookup.end())
 		{
-			//mark as deleted
 			size_t ix = pair->second;
 			storage->entities[ix] = ecs::INVALID_ENTITY;
 			storage->components[ix].entity = ecs::INVALID_ENTITY;
 			storage->components[ix].deleted = true;
+			size_t first_active_ix = storage->entities.size() - storage->active_components;
+			std::swap(storage->entities[first_active_ix], storage->entities[ix]);
+			std::swap(storage->components[first_active_ix], storage->components[ix]);
+			storage->active_components--;
 			storage->lookup.erase(e);
 			if constexpr (has_free<C>::result)
-				storage->components[ix].data.free();
+				storage->components[first_active_ix].data.free();
 		}
 	}
 
@@ -137,8 +145,8 @@ namespace ecs
 
 	template<typename C>
 	inline static ecs::Bag<C>
-	storage_components_data(Component_Storage<C>* storage)
+	storage_active_components_entities(Component_Storage<C>* storage)
 	{
-		return ecs::Bag<C>{ (int)storage->components.size(), &storage->components.front() };
+		return ecs::Bag<C>{ (int)storage->active_components, &storage->components[storage->components.size() - storage->active_components] };
 	}
 };

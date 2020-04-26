@@ -69,7 +69,7 @@ namespace ecs
 		else
 		{
 			//fragmented..custom stack allocater if performance is bad -revisit-
-			void* storage = (void*) new Component_Storage<C>;
+			void* storage = (void*) new Component_Storage<C>{};
 			w.type_storage_map.insert(std::make_pair(type_hash, storage));
 			return storage_entity_add(((Component_Storage<C>*)storage), e);
 		}
@@ -99,12 +99,12 @@ namespace ecs
 
 	template<typename C>
 	inline static ecs::Bag<C>
-	world_components_data(World& w)
+	world_active_components_entities(World& w)
 	{
 		Component_Type_Hash type_hash = typeid(C).hash_code();
 		auto pair = w.type_storage_map.find(type_hash);
 		if (pair != w.type_storage_map.end())
-			return storage_components_data(((Component_Storage<C>*)(pair->second)));
+			return storage_active_components_entities(((Component_Storage<C>*)(pair->second)));
 
 		return ecs::Bag<C>{ 0, nullptr };
 	}

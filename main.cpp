@@ -13,7 +13,7 @@ struct Mesh
 	void
 	free()
 	{
-		m++;
+		m = 100000;
 	}
 };
 
@@ -24,23 +24,28 @@ main()
 	auto e0 = world_entity_new(w);
 	auto e1 = world_entity_new(w);
 	auto e2 = world_entity_new(w);
+	auto e3 = world_entity_new(w);
 
 	auto h0 = world_component_add<Mesh>(w, e0);
 	auto h1 = world_component_add<Mesh>(w, e1);
 	auto h2 = world_component_add<Mesh>(w, e2);
+	auto h3 = world_component_add<Mesh>(w, e3);
 
-	world_handle_component<Mesh>(w, h0)->m = 4;
-	world_handle_component<Mesh>(w, h1)->m = 5;
+	world_handle_component<Mesh>(w, h0)->m = 1;
+	world_handle_component<Mesh>(w, h1)->m = 2;
+	world_handle_component<Mesh>(w, h2)->m = 3;
+	world_handle_component<Mesh>(w, h3)->m = 4;
 
-	auto bag = world_components_data<Mesh>(w);
-	//bag.ptr[2].data.m = 6;
+	world_entity_remove(w, e2);
+	auto bag = world_active_components_entities<Mesh>(w);
+	world_entity_remove(w, e3);
+	bag = world_active_components_entities<Mesh>(w);
 
 	std::vector<Mesh> m;
 	for (int x = 0; x < bag.size; ++x)
 		m.push_back(bag[x].data);
 
 	//world_entity_remove(w, e1);
-	//world_entity_remove(w, e2);
 
 	world_free(w);
 	return  0;
