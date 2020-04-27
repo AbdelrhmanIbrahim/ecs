@@ -1,5 +1,7 @@
 #include "ecs/World.h"
 #include "ecs/Meta.h"
+#include "ecs/Script.h"
+
 using namespace ecs;
 
 struct Physics
@@ -17,6 +19,12 @@ struct Mesh
 	}
 };
 
+void
+some_script(Mesh* c1, Mesh* c2)
+{
+	c1->m = c2->m + 4;
+}
+
 int
 main()
 {
@@ -31,13 +39,13 @@ main()
 	auto h2 = world_component_add<Mesh>(w, e2);
 	auto h3 = world_component_add<Mesh>(w, e3);
 
-	world_handle_component<Mesh>(w, h0)->m = 1;
-	world_handle_component<Mesh>(w, h1)->m = 2;
-	world_handle_component<Mesh>(w, h2)->m = 3;
-	world_handle_component<Mesh>(w, h3)->m = 4;
+	//some scripts
+	ecs::Script<Mesh, Mesh> sc{ e0, e1, some_script };
 
-	auto bag = world_active_components<Mesh>(w);
+	//scripts system will run all scripts later at the end of the update fn
+	script_run(sc, w);
+
 	world_free(w);
-	
+
 	return  0;
 }

@@ -13,6 +13,7 @@ set(HEADERS
 	ecs/Meta.h
 	ecs/Component_Storage.h
 	ecs/World.h
+	ecs/Script.h
 	)
 
 #src
