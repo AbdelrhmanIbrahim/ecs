@@ -108,4 +108,16 @@ namespace ecs
 
 		return ecs::Bag<C>{ 0, nullptr };
 	}
+
+	template<typename C>
+	inline static ecs::Bag<Entity>
+	world_active_entities(World& w)
+	{
+		Component_Type_Hash type_hash = typeid(C).hash_code();
+		auto pair = w.type_storage_map.find(type_hash);
+		if (pair != w.type_storage_map.end())
+			return storage_active_entities(((Component_Storage<C>*)(pair->second)));
+
+		return ecs::Bag<Entity>{ 0, nullptr };
+	}
 };

@@ -38,6 +38,11 @@ main()
 	auto h1 = world_component_add<Mesh>(w, e1);
 	auto h2 = world_component_add<Mesh>(w, e2);
 	auto h3 = world_component_add<Mesh>(w, e3);
+	world_handle_component<Mesh>(w, h0)->m = 4;
+
+	world_entity_remove(w, e3);
+	auto es = world_active_entities<Mesh>(w);
+	auto cs = world_active_components<Mesh>(w);
 
 	//some scripts
 	ecs::Script<Mesh, Mesh> sc{ e0, e1, some_script };

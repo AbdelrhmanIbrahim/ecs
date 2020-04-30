@@ -143,4 +143,11 @@ namespace ecs
 	{
 		return ecs::Bag<C>{ (int)storage->active_components, &storage->components[storage->components.size() - storage->active_components] };
 	}
+
+	template<typename C>
+	inline static ecs::Bag<Entity>
+	storage_active_entities(Component_Storage<C>* storage)
+	{
+		return ecs::Bag<Entity>{ (int)storage->active_components, &storage->entities[storage->entities.size() - storage->active_components] };
+	}
 };
