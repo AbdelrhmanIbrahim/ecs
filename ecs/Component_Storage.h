@@ -62,7 +62,24 @@ namespace ecs
 		void
 		entity_remove(Entity e)
 		{
-			storage_entity_remove<C>(this, e);
+			//removal happens by  marking as deleted and swapping it with the first active element in both arrays
+			//to have a contionus active data (better caching and no branching needed)
+			auto pair = lookup.find(e);
+			if (pair != lookup.end())
+			{
+				size_t to_delete_ix = pair->second;
+				entities[to_delete_ix] = ecs::INVALID_ENTITY;
+
+				size_t first_active_ix = entities.size() - active_components;
+				lookup[entities[first_active_ix]] = to_delete_ix;
+				std::swap(entities[first_active_ix], entities[to_delete_ix]);
+				std::swap(components[first_active_ix], components[to_delete_ix]);
+
+				active_components--;
+				lookup.erase(e);
+				if constexpr (has_free<C>::result)
+					components[first_active_ix].free();
+			}
 		}
 
 		void
@@ -71,7 +88,7 @@ namespace ecs
 			int first_active_ix = entities.size() - active_components;
 			int size = first_active_ix + active_components;
 			for (int i = first_active_ix ; i < size; ++i)
-				storage_entity_remove<C>(this, entities[i]);
+				entity_remove(entities[i]);
 		}
 	};
 
@@ -90,30 +107,6 @@ namespace ecs
 		}
 		else
 			return handle;
-	}
-
-	//removal happens by  marking as deleted and swapping it with the first active element in both arrays
-	//to have a contionus active data (better caching and no branching needed)
-	template <typename C>
-	inline static void
-	storage_entity_remove(Component_Storage<C>* storage, Entity e)
-	{
-		auto pair = storage->lookup.find(e);
-		if (pair != storage->lookup.end())
-		{
-			size_t to_delete_ix = pair->second;
-			storage->entities[to_delete_ix] = ecs::INVALID_ENTITY;
-
-			size_t first_active_ix = storage->entities.size() - storage->active_components;
-			storage->lookup[storage->entities[first_active_ix]] = to_delete_ix;
-			std::swap(storage->entities[first_active_ix], storage->entities[to_delete_ix]);
-			std::swap(storage->components[first_active_ix], storage->components[to_delete_ix]);
-
-			storage->active_components--;
-			storage->lookup.erase(e);
-			if constexpr (has_free<C>::result)
-				storage->components[first_active_ix].free();
-		}
 	}
 
 	template <typename C>

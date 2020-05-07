@@ -5,9 +5,9 @@
 
 #include <vector>
 #include <unordered_map>
-#include <vcruntime.h>
 #include <utility>
 #include <typeinfo>
+#include <cstddef>
 
 namespace ecs
 {
@@ -30,10 +30,10 @@ namespace ecs
 	inline static void
 	world_free(World& w)
 	{
-		for (auto& it = w.type_storage_map.begin(); it != w.type_storage_map.end(); ++it)
+		for (auto it = w.type_storage_map.begin(); it != w.type_storage_map.end(); ++it)
 		{
 			((Storage*)it->second)->free();
-			delete it->second;
+			delete (Storage*)it->second;
 		}
 	}
 
